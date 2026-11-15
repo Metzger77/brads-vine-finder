@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vine Finder | Amazon Vine Link Launcher</title>
+
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtag/js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PHVHKCDP');</script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4GZPGM6JQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config','G-4GZPGM6JQG');
+  </script>
+
+  <style>
+    :root {
+      --bg-dark: #19222d;
+      --card-bg: #232F3E;
+      --accent-orange: #FF9900;
+      --accent-hover: #e68a00;
+      --accent-blue: #00ccff;
+      --btn-bg: #37475A;
+      --text-main: #ffffff;
+      --text-sub: #d1d5db;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+    }
+
+    /* Sticky Header Layout */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      background-color: #111111;
+      padding: 8px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-bottom: 2px solid var(--accent-orange);
+    }
+
+    .sticky-header select,
+    .sticky-header button,
+    .sticky-header a {
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sticky-header select {
+      background: var(--accent-orange);
+      color: #111;
+    }
+
+    .sticky-header button.btn-primary {
+      background: var(--accent-orange);
+      color: #111;
+    }
+
+    .sticky-header button.btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    #stopLaunchingBtn {
+      background: #dc2626;
+      color: #fff;
+    }
+    #stopLaunchingBtn:hover { background: #b91c1c; }
+    #stopLaunchingBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .sticky-header a.queue-link {
+      background: var(--btn-bg);
+      color: var(--accent-blue);
+    }
+    .sticky-header a.queue-link:hover {
+      background: #4b5d73;
+      color: #ffffff;
+    }
+
+    .open-mode-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #e1e8f0;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .sticky-header #openModeSelect {
+      background: #304155;
+      border: 1px solid #64788e;
+      color: #fff;
+      font-size: 0.83rem;
+      padding: 7px 9px;
+    }
+
+    .bulk-launcher { position: relative; }
+    .bulk-launcher summary {
+      list-style: none;
+      cursor: pointer;
+      background: #2e4054;
+      border: 1px solid #586b80;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #dce5ef;
+    }
+    .bulk-launcher summary::-webkit-details-marker { display: none; }
+    .bulk-launcher summary:hover { border-color: var(--accent-orange); }
+    .bulk-controls {
+      position: fixed;
+      top: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 7px;
+      padding: 12px;
+      width: min(740px, 96vw);
+      background: #111d29;
+      border: 1px solid #586b80;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+      z-index: 10002;
+    }
+
+    /* Floating Edge Button pinned to screen side */
+    .floating-edge-link {
+      position: fixed;
+      right: 0;
+      top: 45%;
+      transform: translateY(-50%);
+      background: var(--accent-orange);
+      color: #111;
+      padding: 10px 14px;
+      border-radius: 8px 0 0 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-decoration: none;
+      z-index: 10000;
+      box-shadow: -3px 4px 12px rgba(0,0,0,0.5);
+      transition: all 0.2s ease;
+    }
+    .floating-edge-link:hover {
+      background: var(--accent-hover);
+      padding-left: 18px;
+      color: #000;
+    }
+
+    /* Active Progress Display */
+    #progressBadge {
+      display: none;
+      background: #0284c7;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { opacity: 0.8; }
+    }
+
+    /* Main Container */
+    .main-container {
+      max-width: 950px;
+      margin: 0 auto;
+      padding: 14px 15px 40px;
+      text-align: center;
+    }
+
+    h1 { color: var(--accent-orange); margin: 8px 0 2px; font-size: clamp(1.5rem, 4vw, 2rem); }
+    p.subtitle { color: var(--text-sub); margin: 0 0 12px; font-size: 0.9rem; }
+
+    /* Search Bar */
+    .search-container {
+      margin: 10px auto 12px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      max-width: 760px;
+    }
+
+    #searchBox {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #4b5d73;
+      background: #2b3848;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #searchBox:focus {
+      border-color: var(--accent-orange);
+    }
+
+    .search-container button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent-orange);
+      color: #111;
+      cursor: pointer;
+    }
+    .search-container button:hover { background-color: var(--accent-hover); }
+
+    .quick-discover {
+      background: #202d3b;
+      border: 1px solid #394c60;
+      border-radius: 10px;
+      padding: 13px 15px;
+      margin: 0 auto 14px;
+      text-align: left;
+    }
+    .discover-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 9px;
+    }
+    .discover-heading h2 { font-size: 1.05rem; color: var(--accent-orange); margin: 0; }
+    .discover-heading p { color: var(--text-sub); font-size: 0.78rem; margin: 2px 0 0; }
+    .discover-actions { display: flex; align-items: center; gap: 6px; }
+    .small-action {
+      background: #37475a;
+      color: #f8fafc;
+      border: 1px solid #52677d;
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-size: 0.77rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .small-action:hover { background: #4b6075; }
+    .discovery-terms { display: flex; flex-wrap: wrap; gap: 6px; }
+    .term-chip {
+      background: #304155;
+      border: 1px solid #4b5d73;
+      border-radius: 6px;
+      padding: 6px 11px;
+      color: #e3f8ff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .term-chip:hover, .term-chip:focus-visible {
+      background: #0c5874;
+      border-color: var(--accent-blue);
+      outline: none;
+    }
+    .term-chip:first-child, .term-chip:nth-child(2) { border-color: var(--accent-orange); color: #ffdc9e; }
+    .pick-count {
+      margin-left: 7px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #111;
+      background: var(--accent-orange);
+      border-radius: 10px;
+      padding: 1px 5px;
+    }
+    .popular-empty { color: var(--text-sub); margin: 4px 0; font-size: 0.85rem; }
+    .quick-discover[hidden] { display: none; }
+    #resetPicksBtn[hidden] { display: none; }
+    .recent-searches { margin-top: 10px; border-top: 1px solid #384b60; padding-top: 9px; }
+    .recent-searches[hidden], .discovery-terms[hidden] { display: none; }
+    .recent-label { font-size: 0.75rem; color: var(--text-sub); margin-right: 6px; }
+    .recent-searches .term-chip { padding: 4px 9px; font-size: 0.78rem; margin: 2px; }
+    .filter-status { font-size: 0.8rem; color: #d1d5db; margin: -2px 0 8px; text-align: left; }
+    .filter-status:empty { display: none; }
+
+    .category-jump {
+      position: sticky;
+      top: 56px;
+      z-index: 990;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #182635;
+      border: 1px solid #394c60;
+      border-radius: 8px;
+      padding: 7px 10px;
+      margin-bottom: 12px;
+      font-size: 0.84rem;
+      color: var(--text-sub);
+    }
+    .category-jump select {
+      width: min(380px, 70%);
+      padding: 7px 10px;
+      font-size: 0.85rem;
+      background: #304155;
+      color: #fff;
+      border: 1px solid #627891;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .category { scroll-margin-top: 115px; }
+
+    .term-with-pin, .favorite-pill {
+      display: inline-flex;
+      align-items: stretch;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.23);
+      overflow: hidden;
+    }
+    .term-with-pin[hidden] { display: none; }
+    .term-with-pin .link-item {
+      border: 0;
+      border-radius: 0;
+      background: none;
+      padding-right: 5px;
+    }
+    .pin-toggle, .unpin-button {
+      background: transparent;
+      color: #aebccd;
+      border: 0;
+      cursor: pointer;
+      padding: 3px 7px;
+      font-size: 1rem;
+    }
+    .pin-toggle:hover, .unpin-button:hover, .pin-toggle.is-favorite {
+      color: var(--accent-orange);
+    }
+    .favorite-pill .term-chip { border: none; border-radius: 0; }
+    .favorite-pill .unpin-button { color: var(--accent-orange); }
+    .broad-explorer { margin-top: 15px; }
+    .broad-groups[hidden], .broad-item[hidden], .broad-group[hidden] { display: none; }
+    .broad-group { padding: 11px 0 7px; border-top: 1px solid #384b60; }
+    .broad-group h3 { font-size: 0.95rem; color: var(--accent-orange); margin: 0 0 8px; }
+    .broad-item .term-chip { padding: 6px 9px; }
+    .broad-note { font-size: 0.76rem; color: var(--text-sub); margin: 8px 0 0; }
+
+    .feedback-bar {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10020;
+      width: min(850px, calc(100% - 20px));
+      background: #111d29;
+      border: 1px solid var(--accent-orange);
+      border-radius: 10px;
+      padding: 9px 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+    .feedback-bar[hidden] { display: none; }
+    .feedback-bar strong { color: #fff; }
+    .feedback-bar .feedback-label { font-size: 0.84rem; color: var(--text-sub); }
+    .feedback-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+    .feedback-actions button {
+      border: 1px solid #50657b;
+      border-radius: 6px;
+      color: #fff;
+      background: #304155;
+      cursor: pointer;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+    }
+    .feedback-actions button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .feedback-actions button:hover:not(:disabled) { background: #4b6075; }
+
+    /* Category Cards */
+    .category {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 9px 12px;
+      margin: 0;
+      text-align: left;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      border: 1px solid #2e3e52;
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .category-header h3 {
+      margin: 0;
+      color: var(--accent-orange);
+      font-size: 0.96rem;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .category-header .arrow {
+      font-size: 0.8rem;
+      transition: transform 0.2s;
+      color: var(--accent-orange);
+    }
+
+    .category.expanded .arrow { transform: rotate(90deg); }
+    .category.expanded { grid-column: 1 / -1; }
+    .category[hidden] { display: none; }
+    .categories-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .cat-count { font-size: 0.75rem; color: var(--text-sub); font-weight: 400; }
+
+    .category-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cat-launch-btn {
+      background: #304155;
+      color: #d3e5f3;
+      border: 1px dashed #658096;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-left: auto;
+    }
+    .cat-launch-btn:hover { background: #4b6075; }
+
+    /* Link Tags inside Category */
+    .links {
+      margin-top: 9px;
+      padding-top: 9px;
+      border-top: 1px dashed rgba(255,255,255,0.15);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .link-item {
+      background: rgba(0,0,0,0.25);
+      color: var(--accent-blue);
+      padding: 6px 10px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.83rem;
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.05);
+      flex: 0 1 auto;
+      max-width: 100%;
+      text-align: center;
+      word-break: break-word;
+    }
+
+    .link-item:hover {
+      background: rgba(0, 204, 255, 0.15);
+      color: #66e0ff;
+      border-color: var(--accent-blue);
+    }
+
+    .link-item.highlight {
+      background: rgba(255, 153, 0, 0.3) !important;
+      color: #ffffff !important;
+      border-color: var(--accent-orange) !important;
+      font-weight: bold;
+    }
+
+    .category:not(.expanded) .links { display: none; }
+    .link-item[hidden] { display: none; }
+
+    /* Action Bar above categories */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 10px;
+    }
+
+    #toggleAllBtn {
+      background: var(--btn-bg);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      border: 1px solid var(--accent-orange);
+    }
+    #toggleAllBtn:hover { background: var(--accent-orange); color: #111; }
+    .saved-heading { color: #d1d5db; font-size: 0.88rem; font-weight: 600; }
+
+    /* Toast Notification */
+    .info-message {
+      background: #10b981;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* Deal Sites Footer */
+    .deal-sites-container {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 22px;
+      border: 1px solid #2e3e52;
+    }
+    .deal-sites-container h2 { margin: 0 0 16px; color: var(--accent-orange); }
+    .deal-site-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+    .deal-site-links a {
+      background: #111;
+      color: var(--accent-blue);
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    .deal-site-links a:hover { background: var(--accent-orange); color: #111; }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 768px) {
+      .categories-grid { grid-template-columns: 1fr; }
+      .category.expanded { grid-column: auto; }
+      .search-container { flex-direction: row; }
+      .search-container button { width: auto; white-space: nowrap; padding: 8px 11px; font-size: 0.85rem; }
+      #searchBox { min-width: 0; padding: 10px 11px; }
+      .sticky-header { padding: 7px; gap: 5px; }
+      .sticky-header select, .sticky-header button, .sticky-header a {
+        font-size: 0.85rem; padding: 6px 10px;
+      }
+      .floating-edge-link { font-size: 0.8rem; padding: 8px 10px; }
+      .discover-heading { align-items: flex-start; }
+      .discover-heading p { max-width: 280px; }
+      .bulk-controls { top: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GTM (noscript) -->
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PHVHKCDP" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
+
+  <!-- Always-visible side badge pinned to right edge -->
+  <a href="https://www.amazon.com/vine/resources#vh-monitor" class="floating-edge-link" target="_blank">📖 Help Monitor</a>
+
+  <!-- Sticky Header Controls -->
+  <div class="sticky-header">
+    <a href="https://www.amazon.com/vine/vine-items?queue=potluck" class="queue-link" target="_blank">RFY</a>
+    <a href="https://www.amazon.com/vine/vine-items?queue=last_chance" class="queue-link" target="_blank">AFA</a>
+    <a href="https://www.amazon.com/vine/vine-items?queue=encore" class="queue-link" target="_blank">AI</a>
+
+    <div class="open-mode-control">
+      <label for="openModeSelect">Open searches:</label>
+      <select id="openModeSelect" onchange="setOpenMode(this.value)" aria-label="Where to open Amazon Vine searches">
+        <option value="same" selected>↩ Same tab</option>
+        <option value="new">↗ New tab</option>
+      </select>
+    </div>
+
+    <details class="bulk-launcher">
+      <summary>⚙️ Batch tools</summary>
+      <div class="bulk-controls">
+        <select id="delay" aria-label="Time between launched tabs">
+          <option value="5000">5s Delay</option>
+          <option value="7000" selected>7s Delay</option>
+          <option value="10000">10s Delay</option>
+          <option value="random">Random (4–10s)</option>
+        </select>
+        <button id="launchAllBtn" class="btn-primary" onclick="launchAll(this)">Launch All Links</button>
+        <button id="stopLaunchingBtn" onclick="stopLaunching()" disabled>🛑 Stop</button>
+        <button id="creatorsListBtn" class="btn-primary" onclick="launchCreatorsList(this)">Creators List</button>
+      </div>
+    </details>
+
+    <div id="progressBadge">Launching 0 / 0</div>
+  </div>
+
+  <div class="main-container">
+    <h1>🔎 Vine Finder</h1>
+    <p class="subtitle">Pick one search at a time. Same tab is the default, so your browser's Back button brings you right back.</p>
+
+    <!-- Search Controls -->
+    <div class="search-container">
+      <input
+        type="text"
+        id="searchBox"
+        oninput="handleSearchInput(this.value)"
+        onkeydown="searchAmazonKey(event)"
+        placeholder="Search Vine or filter saved terms..."
+        aria-label="Search Amazon Vine or filter saved searches">
+      <button type="button" onclick="searchAmazonClick()">Search Vine</button>
+    </div>
+
+    <div class="category-jump">
+      <label for="categoryJumpSelect">📂 Jump to</label>
+      <select id="categoryJumpSelect" onchange="jumpToCategory(this.value)">
+        <option value="">Choose a category...</option>
+      </select>
+    </div>
+
+    <section class="quick-discover" aria-label="Favorite searches">
+      <div class="discover-heading">
+        <div>
+          <h2>⭐ Favorite searches</h2>
+          <p>Pin searches with the ☆ beside any keyword.</p>
+        </div>
+      </div>
+      <div id="favoriteTerms" class="discovery-terms"></div>
+      <p id="favoriteEmpty" class="popular-empty">No favorites pinned yet.</p>
+    </section>
+
+    <section class="quick-discover" id="bestFindsSection" aria-label="Best performing searches" hidden>
+      <div class="discover-heading">
+        <div>
+          <h2>🏆 Searches that pay off</h2>
+          <p>Ranked by your “Good find” and “No luck” feedback.</p>
+        </div>
+      </div>
+      <div id="bestFindTerms" class="discovery-terms"></div>
+    </section>
+
+    <section class="quick-discover" aria-label="Your most picked searches">
+      <div class="discover-heading">
+        <div>
+          <h2>🔥 My most picked searches</h2>
+          <p>Updates automatically from your last 100 individual searches in this browser.</p>
+        </div>
+        <button type="button" class="small-action" id="resetPicksBtn" onclick="resetPickHistory()" hidden>Reset ranking</button>
+      </div>
+      <div id="popularTerms" class="discovery-terms"></div>
+      <p id="popularEmpty" class="popular-empty">Your favorite searches will appear here as you pick items below.</p>
+    </section>
+
+    <section class="quick-discover" aria-label="Discovery searches">
+      <div class="discover-heading">
+        <div>
+          <h2>✨ Find the good stuff</h2>
+          <p>Broad words like “set” and “kit” often turn up unexpected finds.</p>
+        </div>
+        <div class="discover-actions">
+          <button type="button" class="small-action" id="moreIdeasBtn" onclick="toggleMoreIdeas()">+ More ideas</button>
+          <button type="button" class="small-action" onclick="surpriseSearch()">🎲 Surprise me</button>
+        </div>
+      </div>
+      <div id="discoveryTerms" class="discovery-terms"></div>
+      <div id="moreDiscoveryTerms" class="discovery-terms" hidden style="margin-top:6px"></div>
+      <div id="recentSearches" class="recent-searches" hidden></div>
+    </section>
+
+    <div id="filterStatus" class="filter-status" role="status" aria-live="polite"></div>
+
+    <div class="controls-bar">
+      <span class="saved-heading">📁 Saved searches <span id="categoryCount"></span></span>
+      <button id="toggleAllBtn" onclick="toggleAllCategories()">Minimize All Categories</button>
+    </div>
+
+    <!-- Dynamic Category Container -->
+    <div id="categories" class="categories-grid"></div>
+
+    <!-- Supplemental discovery words; personal saved searches above are unchanged. -->
+    <section class="quick-discover broad-explorer" id="broadExplorer" aria-label="Broad keyword explorer">
+      <div class="discover-heading">
+        <div>
+          <h2>🧭 100 Broad Discovery Keywords</h2>
+          <p>Extra one-word searches for unexpected finds. Your personal categories above stay intact.</p>
+        </div>
+        <button type="button" class="small-action" id="toggleBroadBtn" onclick="toggleBroadExplorer()" aria-expanded="false">Show 100 words</button>
+      </div>
+      <div id="broadGroups" class="broad-groups" hidden></div>
+      <p class="broad-note">$0 ETV isn't guaranteed by a search word. Always check the specific item's value before requesting it.</p>
+    </section>
+
+    <!-- Deal Sites -->
+    <div class="deal-sites-container">
+      <h2>🔗 More Deal Sites</h2>
+      <div class="deal-site-links">
+        <a href="https://www.jungle.deals/" target="_blank">Jungle.Deals</a>
+        <a href="https://www.dealsea.com/" target="_blank">Dealsea.com</a>
+        <a href="https://slickdeals.net/" target="_blank">Slickdeals</a>
+        <a href="https://www.dealnews.com/" target="_blank">DealNews</a>
+        <a href="https://www.woot.com/" target="_blank">Woot!</a>
+        <a href="https://www.bradsdeals.com/" target="_blank">Brad's Deals</a>
+        <a href="https://clarkdeals.com/" target="_blank">ClarkDeals</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="infoMessage" class="info-message"></div>
+
+  <div id="feedbackBar" class="feedback-bar" hidden role="region" aria-label="Rate your last search">
+    <div class="feedback-label">Last search: <strong id="feedbackTerm"></strong> <span id="feedbackStatus">— Did you find something good?</span></div>
+    <div class="feedback-actions">
+      <button type="button" id="goodFindBtn" onclick="rateLastSearch('good')">👍 Good find</button>
+      <button type="button" id="noLuckBtn" onclick="rateLastSearch('bad')">👎 No luck</button>
+      <button type="button" id="pinLastBtn" onclick="toggleLastFavorite()">☆ Pin</button>
+      <button type="button" onclick="dismissFeedback()" aria-label="Close search feedback">✕</button>
+    </div>
+  </div>
+
+  <script>
+    let pendingTimeouts = [];
+    let currentActiveLauncher = null;
+
+    const launchAllButton = document.getElementById('launchAllBtn');
+    const stopLaunchingButton = document.getElementById('stopLaunchingBtn');
+    const creatorsListButton = document.getElementById('creatorsListBtn');
+    const toggleAllButton = document.getElementById('toggleAllBtn');
+    const infoMessageElement = document.getElementById('infoMessage');
+    const container = document.getElementById('categories');
+    const progressBadge = document.getElementById('progressBadge');
+    const searchBox = document.getElementById('searchBox');
+    const filterStatus = document.getElementById('filterStatus');
+
+    // Short discovery searches stay visible; extra ideas are one tap away.
+    const discoveryTerms = [
+      'Set', 'Kit', 'Bundle', 'Combo', 'Assortment',
+      'Variety Pack', '2 Pack', 'Organizer', 'Rechargeable', 'Portable'
+    ];
+    const extraDiscoveryTerms = [
+      'Multi Pack', '3 Pack', 'Accessories', 'Replacement', 'Cordless',
+      'Magnetic', 'Wireless', 'Smart', 'Universal', 'Adjustable',
+      'Heavy Duty', 'Stainless Steel', 'Tool Set', 'Storage', 'Premium'
+    ];
+
+    // Supplemental broad searches, deliberately separate from the personal
+    // categories and from the bulk-tab launcher. None replace saved keywords.
+    const broadSearchGroups = [
+      {title: '🧴 Health, Beauty & Personal Care', words: [
+        'serum', 'cream', 'lotion', 'soap', 'shampoo', 'conditioner', 'oil',
+        'gummies', 'supplement', 'vitamin', 'massager', 'brace', 'heating',
+        'ice', 'bandage', 'thermometer', 'trimmer', 'shaver', 'dryer',
+        'straightener', 'nail', 'brush', 'toothbrush', 'flosser', 'scale'
+      ]},
+      {title: '🍳 Kitchen & Food', words: [
+        'coffee', 'espresso', 'tea', 'blender', 'mixer', 'fryer', 'toaster',
+        'kettle', 'pan', 'pot', 'skillet', 'knife', 'cutting', 'tumbler',
+        'bottle', 'container', 'silicone', 'stainless', 'spice', 'grinder'
+      ]},
+      {title: '🧰 Tools, Auto & Garage', words: [
+        'cordless', 'drill', 'driver', 'saw', 'wrench', 'socket', 'ratchet',
+        'pliers', 'battery', 'flashlight', 'worklight', 'wiper', 'mount',
+        'dash', 'inflator'
+      ]},
+      {title: '💻 Tech & Electronics', words: [
+        'monitor', 'keyboard', 'mouse', 'headset', 'earbuds', 'speaker',
+        'camera', 'projector', 'tablet', 'charger', 'cable', 'hub', 'dock',
+        'router', 'smart'
+      ]},
+      {title: '🏡 Home, Outdoor & Pool', words: [
+        'vacuum', 'mop', 'filter', 'organizer', 'storage', 'rack', 'shelf',
+        'rug', 'pillow', 'blanket', 'lamp', 'led', 'solar', 'floodlight',
+        'security', 'pool', 'chlorine', 'hose', 'sprinkler', 'grill'
+      ]},
+      {title: '🐾 Pets', words: ['dog', 'pet', 'leash', 'collar', 'feeder']}
+    ];
+    let broadUserExpanded = false;
+    const recentStorageKey = 'vine-finder-recent-searches-v1';
+    const pickStorageKey = 'vine-finder-individual-picks-v1';
+    const favoritesStorageKey = 'vine-finder-favorite-searches-v1';
+    const feedbackStorageKey = 'vine-finder-find-feedback-v1';
+    const lastSearchStorageKey = 'vine-finder-last-search-v1';
+    const openModeStorageKey = 'vine-finder-open-mode-v1';
+    let temporaryOpenMode = 'same';
+    const maxPickHistory = 100;
+
+    function showInfoMessage(msg, duration = 3000) {
+      infoMessageElement.textContent = msg;
+      infoMessageElement.style.display = 'block';
+      setTimeout(() => infoMessageElement.style.display = 'none', duration);
+    }
+
+    function getOpenMode() {
+      try { return localStorage.getItem(openModeStorageKey) === 'new' ? 'new' : 'same'; }
+      catch (_) { return temporaryOpenMode; }
+    }
+
+    function applyOpenMode() {
+      const mode = getOpenMode();
+      document.getElementById('openModeSelect').value = mode;
+      document.querySelectorAll('a.vine-individual-link, a.queue-link').forEach(link => {
+        link.target = mode === 'new' ? '_blank' : '_self';
+        link.rel = mode === 'new' ? 'noopener noreferrer' : '';
+      });
+    }
+
+    function setOpenMode(value) {
+      temporaryOpenMode = value === 'new' ? 'new' : 'same';
+      try { localStorage.setItem(openModeStorageKey, temporaryOpenMode); } catch (_) {}
+      applyOpenMode();
+      showInfoMessage(temporaryOpenMode === 'new'
+        ? 'Searches now open in a new tab.'
+        : 'Searches now open in this tab. Use Back to return.', 2600);
+    }
+
+    function getRecentSearches() {
+      try {
+        const value = JSON.parse(localStorage.getItem(recentStorageKey) || '[]');
+        return Array.isArray(value) ? value.filter(term => typeof term === 'string').slice(0, 5) : [];
+      } catch (_) { return []; }
+    }
+
+    function saveRecentSearch(term) {
+      const recent = getRecentSearches().filter(old => old.toLowerCase() !== term.toLowerCase());
+      recent.unshift(term);
+      try { localStorage.setItem(recentStorageKey, JSON.stringify(recent.slice(0, 5))); } catch (_) {}
+      renderRecentSearches();
+    }
+
+    // Only individual searches count. Keeping the last 100 lets rankings
+    // shift naturally when browsing habits change, without an account/backend.
+    function getPickHistory() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(pickStorageKey) || '[]');
+        return Array.isArray(saved) ? saved.filter(pick =>
+          pick && typeof pick.term === 'string' && pick.term.trim()
+        ).slice(-maxPickHistory) : [];
+      } catch (_) { return []; }
+    }
+
+    function recordIndividualPick(term) {
+      const history = getPickHistory();
+      history.push({term: String(term).trim(), time: Date.now()});
+      try { localStorage.setItem(pickStorageKey, JSON.stringify(history.slice(-maxPickHistory))); } catch (_) {}
+      saveRecentSearch(term);
+      renderMostPicked();
+      setLastSearch({term: String(term).trim(), rated: null, dismissed: false});
+    }
+
+    function getFavoriteTerms() {
+      try {
+        const value = JSON.parse(localStorage.getItem(favoritesStorageKey) || '[]');
+        return Array.isArray(value) ? value.filter(term => typeof term === 'string' && term.trim()).slice(0, 40) : [];
+      } catch (_) { return []; }
+    }
+
+    function isFavorite(term) {
+      return getFavoriteTerms().some(saved => saved.toLowerCase() === term.toLowerCase());
+    }
+
+    function toggleFavorite(term) {
+      const favorites = getFavoriteTerms();
+      const index = favorites.findIndex(saved => saved.toLowerCase() === term.toLowerCase());
+      if (index >= 0) favorites.splice(index, 1);
+      else if (favorites.length < 40) favorites.push(term);
+      else return showInfoMessage('You can pin up to 40 favorite searches.', 3000);
+
+      try { localStorage.setItem(favoritesStorageKey, JSON.stringify(favorites)); } catch (_) {}
+      renderFavorites();
+      renderFeedbackBar();
+    }
+
+    function renderFavorites() {
+      const box = document.getElementById('favoriteTerms');
+      const favorites = getFavoriteTerms();
+      box.replaceChildren();
+      favorites.forEach(term => {
+        const wrapper = document.createElement('span');
+        wrapper.className = 'favorite-pill';
+        addTermButton(wrapper, term);
+
+        const unpin = document.createElement('button');
+        unpin.type = 'button';
+        unpin.className = 'unpin-button';
+        unpin.textContent = '★';
+        unpin.title = `Unpin ${term}`;
+        unpin.setAttribute('aria-label', `Unpin ${term}`);
+        unpin.onclick = () => toggleFavorite(term);
+        wrapper.appendChild(unpin);
+        box.appendChild(wrapper);
+      });
+      document.getElementById('favoriteEmpty').hidden = favorites.length > 0;
+      document.querySelectorAll('.pin-toggle').forEach(button => {
+        const pinned = favorites.some(term => term.toLowerCase() === button.dataset.term.toLowerCase());
+        button.textContent = pinned ? '★' : '☆';
+        button.classList.toggle('is-favorite', pinned);
+        button.title = `${pinned ? 'Unpin' : 'Pin'} ${button.dataset.term}`;
+        button.setAttribute('aria-label', button.title);
+      });
+    }
+
+    function getLastSearch() {
+      try {
+        const value = JSON.parse(localStorage.getItem(lastSearchStorageKey) || 'null');
+        return value && typeof value.term === 'string' && value.term.trim() ? value : null;
+      } catch (_) { return null; }
+    }
+
+    function setLastSearch(search) {
+      try { localStorage.setItem(lastSearchStorageKey, JSON.stringify(search)); } catch (_) {}
+      renderFeedbackBar();
+    }
+
+    function renderFeedbackBar() {
+      const current = getLastSearch();
+      const bar = document.getElementById('feedbackBar');
+      bar.hidden = !current || Boolean(current.dismissed);
+      if (!current) return;
+      document.getElementById('feedbackTerm').textContent = current.term;
+      document.getElementById('feedbackStatus').textContent = current.rated === 'good'
+        ? '— Marked as a good find.'
+        : current.rated === 'bad' ? '— Marked as no luck.' : '— Did you find something good?';
+      document.getElementById('goodFindBtn').disabled = Boolean(current.rated);
+      document.getElementById('noLuckBtn').disabled = Boolean(current.rated);
+      document.getElementById('pinLastBtn').textContent = isFavorite(current.term) ? '★ Pinned' : '☆ Pin';
+    }
+
+    function dismissFeedback() {
+      const current = getLastSearch();
+      if (current) setLastSearch({...current, dismissed: true});
+    }
+
+    function toggleLastFavorite() {
+      const current = getLastSearch();
+      if (current) toggleFavorite(current.term);
+    }
+
+    function getFeedbackScores() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(feedbackStorageKey) || '{}');
+        return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+      } catch (_) { return {}; }
+    }
+
+    function rateLastSearch(rating) {
+      const current = getLastSearch();
+      if (!current || current.rated || !['good', 'bad'].includes(rating)) return;
+      const scores = getFeedbackScores();
+      const key = `term:${current.term.toLowerCase()}`;
+      const score = scores[key] || {term: current.term, good: 0, bad: 0};
+      score.term = current.term;
+      score[rating] = (Number(score[rating]) || 0) + 1;
+      scores[key] = score;
+      try { localStorage.setItem(feedbackStorageKey, JSON.stringify(scores)); } catch (_) {}
+      setLastSearch({...current, rated: rating});
+      renderBestFinds();
+      showInfoMessage(rating === 'good' ? 'Added to your good finds!' : 'Noted. This search moves down in Good Finds.');
+    }
+
+    function renderBestFinds() {
+      const box = document.getElementById('bestFindTerms');
+      const ranked = Object.values(getFeedbackScores())
+        .filter(row => row && typeof row.term === 'string')
+        .map(row => ({term: row.term, good: Number(row.good) || 0, bad: Number(row.bad) || 0}))
+        .filter(row => row.good > row.bad)
+        .sort((a,b) => (b.good-b.bad)-(a.good-a.bad) || b.good-a.good)
+        .slice(0, 8);
+      box.replaceChildren();
+      ranked.forEach(row => {
+        const button = addTermButton(box, row.term);
+        const badge = document.createElement('span');
+        badge.className = 'pick-count';
+        badge.textContent = `+${row.good-row.bad}`;
+        button.appendChild(badge);
+      });
+      document.getElementById('bestFindsSection').hidden = ranked.length === 0;
+    }
+
+    function renderMostPicked() {
+      const box = document.getElementById('popularTerms');
+      const history = getPickHistory();
+      box.replaceChildren();
+
+      const ranked = new Map();
+      history.forEach((pick, index) => {
+        const key = pick.term.trim().toLowerCase();
+        const entry = ranked.get(key) || {term: pick.term, count: 0, latest: -1};
+        entry.term = pick.term;
+        entry.count++;
+        entry.latest = index;
+        ranked.set(key, entry);
+      });
+
+      [...ranked.values()]
+        .sort((a, b) => b.count - a.count || b.latest - a.latest)
+        .slice(0, 8)
+        .forEach(entry => {
+          const button = addTermButton(box, entry.term);
+          const badge = document.createElement('span');
+          badge.className = 'pick-count';
+          badge.textContent = `${entry.count}×`;
+          button.appendChild(badge);
+        });
+
+      document.getElementById('popularEmpty').hidden = ranked.size > 0;
+      document.getElementById('resetPicksBtn').hidden = ranked.size === 0;
+    }
+
+    function resetPickHistory() {
+      if (!window.confirm('Reset your most-picked search ranking on this browser?')) return;
+      try { localStorage.removeItem(pickStorageKey); } catch (_) {}
+      renderMostPicked();
+    }
+
+    function openVineSearch(term) {
+      const cleanTerm = String(term).trim();
+      if (!cleanTerm) return showInfoMessage('Enter a search term first.', 2000);
+      const url = `https://www.amazon.com/vine/vine-items?search=${encodeURIComponent(cleanTerm)}`;
+      recordIndividualPick(cleanTerm);
+      if (getOpenMode() === 'new') {
+        window.open(url, '_blank');
+        showInfoMessage(`Searching Vine for “${cleanTerm}”`);
+      } else {
+        window.location.assign(url);
+      }
+    }
+
+    function addTermButton(parent, term) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'term-chip';
+      button.textContent = term;
+      button.title = `Search Amazon Vine for ${term}`;
+      button.onclick = () => openVineSearch(term);
+      parent.appendChild(button);
+      return button;
+    }
+
+    function renderDiscoveryTerms() {
+      const primary = document.getElementById('discoveryTerms');
+      const more = document.getElementById('moreDiscoveryTerms');
+      discoveryTerms.forEach(term => addTermButton(primary, term));
+      extraDiscoveryTerms.forEach(term => addTermButton(more, term));
+    }
+
+    function renderBroadExplorer() {
+      const container = document.getElementById('broadGroups');
+      broadSearchGroups.forEach(group => {
+        const section = document.createElement('section');
+        section.className = 'broad-group';
+
+        const heading = document.createElement('h3');
+        heading.textContent = `${group.title} (${group.words.length})`;
+        section.appendChild(heading);
+
+        const terms = document.createElement('div');
+        terms.className = 'discovery-terms';
+        group.words.forEach(term => {
+          const wrapper = document.createElement('span');
+          wrapper.className = 'favorite-pill broad-item';
+          const button = addTermButton(wrapper, term);
+          button.classList.add('broad-term');
+
+          const pin = document.createElement('button');
+          pin.type = 'button';
+          pin.className = 'pin-toggle';
+          pin.dataset.term = term;
+          pin.textContent = '☆';
+          pin.setAttribute('aria-label', `Pin ${term}`);
+          pin.onclick = () => toggleFavorite(term);
+          wrapper.appendChild(pin);
+          terms.appendChild(wrapper);
+        });
+        section.appendChild(terms);
+        container.appendChild(section);
+      });
+    }
+
+    function setBroadExplorerExpanded(expanded) {
+      document.getElementById('broadGroups').hidden = !expanded;
+      const toggle = document.getElementById('toggleBroadBtn');
+      toggle.textContent = expanded ? 'Hide broad words' : 'Show 100 words';
+      toggle.setAttribute('aria-expanded', String(expanded));
+    }
+
+    function toggleBroadExplorer() {
+      broadUserExpanded = !broadUserExpanded;
+      setBroadExplorerExpanded(broadUserExpanded);
+    }
+
+    function toggleMoreIdeas() {
+      const more = document.getElementById('moreDiscoveryTerms');
+      const button = document.getElementById('moreIdeasBtn');
+      more.hidden = !more.hidden;
+      button.textContent = more.hidden ? '+ More ideas' : '− Fewer ideas';
+      button.setAttribute('aria-expanded', String(!more.hidden));
+    }
+
+    function surpriseSearch() {
+      const pool = [...discoveryTerms, ...extraDiscoveryTerms];
+      openVineSearch(pool[Math.floor(Math.random() * pool.length)]);
+    }
+
+    function renderRecentSearches() {
+      const box = document.getElementById('recentSearches');
+      box.replaceChildren();
+      const recent = getRecentSearches();
+      box.hidden = recent.length === 0;
+      if (!recent.length) return;
+
+      const label = document.createElement('span');
+      label.className = 'recent-label';
+      label.textContent = 'Recent:';
+      box.appendChild(label);
+      recent.forEach(term => addTermButton(box, term));
+
+      const clear = document.createElement('button');
+      clear.className = 'small-action';
+      clear.type = 'button';
+      clear.textContent = 'Clear';
+      clear.style.marginLeft = '5px';
+      clear.onclick = () => {
+        try { localStorage.removeItem(recentStorageKey); } catch (_) {}
+        renderRecentSearches();
+      };
+      box.appendChild(clear);
+    }
+
+    // Filter the actual saved search buttons, automatically revealing matches.
+    function handleSearchInput(val) {
+      const query = val.toLowerCase().trim();
+      let found = 0;
+
+      document.querySelectorAll('.category').forEach(cat => {
+        const titleMatches = query && cat.dataset.title.includes(query);
+        let categoryMatches = 0;
+        cat.querySelectorAll('.link-item').forEach(link => {
+          const matches = !query || titleMatches || link.textContent.toLowerCase().includes(query);
+          link.hidden = !matches;
+          const wrapper = link.closest('.term-with-pin');
+          if (wrapper) wrapper.hidden = !matches;
+          link.classList.toggle('highlight', Boolean(query && matches));
+          if (query && matches) categoryMatches++;
+        });
+
+        cat.hidden = Boolean(query && categoryMatches === 0);
+        cat.classList.toggle('expanded', query ? categoryMatches > 0 : cat.dataset.userExpanded === 'true');
+        cat.querySelector('.category-header').setAttribute('aria-expanded', String(cat.classList.contains('expanded')));
+        found += categoryMatches;
+      });
+
+      let broadFound = 0;
+      document.querySelectorAll('.broad-group').forEach(group => {
+        const titleMatches = query && group.querySelector('h3').textContent.toLowerCase().includes(query);
+        let groupMatches = 0;
+        group.querySelectorAll('.broad-item').forEach(wrapper => {
+          const term = wrapper.querySelector('.broad-term').textContent.toLowerCase();
+          const matches = !query || titleMatches || term.includes(query);
+          wrapper.hidden = !matches;
+          if (query && matches) groupMatches++;
+        });
+        group.hidden = Boolean(query && groupMatches === 0);
+        broadFound += groupMatches;
+      });
+      setBroadExplorerExpanded(query ? broadFound > 0 : broadUserExpanded);
+
+      const total = found + broadFound;
+
+      if (!query) {
+        filterStatus.textContent = '';
+      } else if (total) {
+        filterStatus.textContent = `${total} search${total === 1 ? '' : 'es'} matching “${val.trim()}”. Press Enter to search Vine directly.`;
+      } else {
+        filterStatus.textContent = `No saved or broad matches for “${val.trim()}”. Press Enter to search Amazon Vine anyway.`;
+      }
+      toggleAllButton.textContent = query ? 'Expand All Categories' :
+        (Array.from(document.querySelectorAll('.category')).every(cat => cat.classList.contains('expanded'))
+          ? 'Minimize All Categories' : 'Expand All Categories');
+    }
+
+    function searchAmazonKey(e) {
+      if (e.key === 'Enter') searchAmazonClick();
+    }
+
+    function searchAmazonClick() {
+      openVineSearch(searchBox.value);
+    }
+
+    function getDelayValue() {
+      const v = document.getElementById('delay').value;
+      if (v === 'random') return Math.floor(Math.random() * (10000 - 4000 + 1)) + 4000;
+      return parseInt(v, 10);
+    }
+
+    // Core Tab Launcher with Visual Counter
+    function launchItems(items, prefix, elem, fixedDelay = null) {
+      if (currentActiveLauncher && currentActiveLauncher !== elem) {
+        return showInfoMessage('Another launch sequence is active. Please stop it first.', 4000);
+      }
+
+      stopLaunching();
+      currentActiveLauncher = elem;
+      stopLaunchingButton.disabled = false;
+      launchAllButton.disabled = true;
+      creatorsListButton.disabled = true;
+
+      showInfoMessage(`${prefix}...`);
+      progressBadge.style.display = 'inline-flex';
+
+      let total = items.length;
+      let done = 0;
+      let delaySum = 0;
+
+      if (total === 0) {
+        resetLaunchButtons();
+        return showInfoMessage('No items to launch.', 2000);
+      }
+
+      progressBadge.textContent = `Launching 0 / ${total}`;
+
+      items.forEach(([_, slug], index) => {
+        const url = `https://www.amazon.com/vine/vine-items?search=${slug}`;
+        const d = fixedDelay !== null ? fixedDelay : getDelayValue();
+
+        const id = setTimeout(() => {
+          const win = window.open(url, '_blank');
+          if (!win) {
+            showInfoMessage('Popup blocked! Please allow popups for this site.', 5000);
+          }
+          done++;
+          progressBadge.textContent = `Launching ${done} / ${total}`;
+
+          pendingTimeouts = pendingTimeouts.filter(x => x !== id);
+
+          if (done === total) {
+            setTimeout(() => {
+              if (pendingTimeouts.length === 0) {
+                resetLaunchButtons();
+                showInfoMessage('All tabs launched!', 3000);
+              }
+            }, 500);
+          }
+        }, delaySum);
+
+        pendingTimeouts.push(id);
+        delaySum += d;
+      });
+    }
+
+    function resetLaunchButtons() {
+      pendingTimeouts.forEach(clearTimeout);
+      pendingTimeouts = [];
+      launchAllButton.disabled = false;
+      creatorsListButton.disabled = false;
+      stopLaunchingButton.disabled = true;
+      progressBadge.style.display = 'none';
+      currentActiveLauncher = null;
+    }
+
+    function stopLaunching() {
+      if (pendingTimeouts.length) showInfoMessage('Tab launching stopped!', 2000);
+      resetLaunchButtons();
+    }
+
+    function launchAll(btn) {
+      const all = Object.values(categories).flat();
+      launchItems(all, 'Launching all stored links', btn);
+    }
+
+    function launchCreatorsList(btn) {
+      launchItems(creatorsListItems, 'Launching Creators List', btn, 8000);
+    }
+
+    function toggleAllCategories() {
+      if (searchBox.value.trim()) {
+        searchBox.value = '';
+        handleSearchInput('');
+      }
+      const all = document.querySelectorAll('.category');
+      const allExpanded = Array.from(all).every(d => d.classList.contains('expanded'));
+      const expand = !allExpanded;
+
+      all.forEach(d => {
+        d.classList.toggle('expanded', expand);
+        d.dataset.userExpanded = String(expand);
+        d.querySelector('.category-header').setAttribute('aria-expanded', String(expand));
+      });
+
+      toggleAllButton.textContent = expand ? 'Minimize All Categories' : 'Expand All Categories';
+    }
+
+    function jumpToCategory(value) {
+      if (value === '') return;
+      const target = value === 'broad'
+        ? document.getElementById('broadExplorer')
+        : document.getElementById(`category-${value}`);
+      if (!target) return;
+      if (searchBox.value.trim()) {
+        searchBox.value = '';
+        handleSearchInput('');
+      }
+      if (value === 'broad') {
+        broadUserExpanded = true;
+        setBroadExplorerExpanded(true);
+      } else {
+        target.classList.add('expanded');
+        target.dataset.userExpanded = 'true';
+        target.querySelector('.category-header').setAttribute('aria-expanded', 'true');
+      }
+      target.scrollIntoView({behavior: 'smooth', block: 'start'});
+      document.getElementById('categoryJumpSelect').value = '';
+    }
+
+    // Categories Dataset
+    const categories = {
+      "✨ Zero ETV Focus": [
+        ["Supplements","Supplements"],["Vitamins","Vitamins"],["Gummies","Gummies"],
+        ["Shampoo","Shampoo"],["Conditioner","Conditioner"],["Lotion","Lotion"],
+        ["Mascara","Mascara"],["Makeup","Makeup"],["Skincare","Skincare"],
+        ["Face Mask","Face%20Mask"],["Makeup Brush","Makeup%20Brush"],
+        ["Bandages","Bandages"],["Brace","Brace"],["Reading Glasses","Reading%20glasses"],
+        ["Coffee","Coffee"],["Tea","Tea"],["Snacks","Snacks"],["Ramen","Ramen"],
+        ["Nuts","Nuts"],["Granola","Granola"],["Detergent","Detergent"],
+        ["Pet Food","Pet%20Food"],["Pet Treats","Pet%20Treats"],
+        ["Wipes","Wipes"],["Lubricant","Lubricant"],["Massager","Massager"]
+      ],
+      "🚗 Automotive & Powersports": [
+        ["Camry 2011","Camry%202011"],
+        ["CR-V 2026","CR-V%202026"],
+        ["CRV 2026","CRV%202026"],
+        ["CR-V 2007","CR-V%202007"],
+        ["CRV 2007","CRV%202007"],
+        ["Express 1500","Express%201500"],
+        ["Dash Cam","Dash%20cam"],
+        ["Dashcam","Dashcam"],
+        ["Wiper","Wiper"],["Relay Switch","Relay%20switch"],
+        ["NHX110","NHX110"],
+        ["Phone Holder","Phone%20holder"],["Car Organizer","Car%20Organizer"],
+        ["TPMS","TPMS"],["Tire Gauge","Tire%20Gauge"],
+        ["Jump Starter Cable","Jump%20Starter%20Cable"],["Car Cover","Car%20Cover"],
+        ["Motorcycle Phone Mount","Motorcycle%20Phone%20Mount"],
+        ["Car Clean","Car%20Clean"],["Detailing","Detailing"],
+        ["LED Headlight","LED%20Headlight"],
+        ["Seat Covers","Seat%20Covers"],["Car Polish","Car%20Polish"]
+      ],
+      "🧰 Tools & Home Improvement": [
+        ["Milwaukee","Milwaukee"],["Milwaukee M18","Milwaukee%20M18"],
+        ["DeWalt","DeWalt"],["DeWalt 20V","DeWalt%2020V"],
+        ["Makita","Makita"],["Ryobi","Ryobi"],["Bosch","Bosch"],
+        ["Craftsman","Craftsman"],["Ridgid","Ridgid"],["Kobalt","Kobalt"],
+        ["Husky","Husky"],["Stanley","Stanley"],["Black+Decker","Black%2BDecker"],
+        ["Dremel","Dremel"],["Klein Tools","Klein%20Tools"],
+        ["GearWrench","GearWrench"],["Metabo HPT","Metabo%20HPT"],
+        ["Skil","Skil"],["FLEX","FLEX"],["Knipex","Knipex"],
+        ["Irwin","Irwin"],["Crescent","Crescent"],
+        ["Tool Kit","Tool%20kit"],["Socket Set","Socket%20set"],
+        ["Smart Plug","Smart%20plug"],["IP68","IP68"],["Electric Kettle","Electric%20Kettle"],
+        ["Smart Lighting","Smart%20Lighting"],["Cookware","Cookware"],
+        ["Air Fryer","Air%20Fryer"],["Airfryer","Airfryer"],
+        ["Heated Blanket","Heated%20Blanket"]
+      ],
+      "🚜 John Deere & Garden Tractors": [
+        ["John Deere 420","John%20Deere%20420"],
+        ["John Deere 318","John%20Deere%20318"],
+        ["John Deere 430","John%20Deere%20430"],
+        ["John Deere","John%20Deere"],
+        ["Garden Tractor","Garden%20Tractor"],
+        ["Lawn Tractor","Lawn%20Tractor"],
+        ["Tractor Parts","Tractor%20Parts"],
+        ["Mower Deck","Mower%20Deck"],
+        ["Tractor Seat","Tractor%20Seat"],
+        ["Mower Accessories","Mower%20Accessories"]
+      ],
+      "📱 Tech & Electronics": [
+        ["Wireless","Wireless"],["Google Pixel 10 XL","Google%20Pixel%2010%20XL"],
+        ["Lexmark","Lexmark"],["Robot","Robot"],
+        ["Robotic","Robotic"],["Bluetooth","Bluetooth"],["HDMI","HDMI"],
+        ["USB Hub","USB%20Hub"],["Ethernet","Ethernet"],["Keyboard","Keyboard"],
+        ["Headphones","Headphones"],["Streaming","Streaming"],
+        ["iPhone 16 Pro 6.3","iPhone%2016%20Pro%206.3"],["Webcam","Webcam"],
+        ["Microphone","Microphone"],["Monitor Stand","Monitor%20Stand"],
+        ["Wi-Fi Extender","Wi%20Fi%20Extender"],["WiFi","WiFi"]
+      ],
+      "🧔 Grooming & Personal Care": [
+        ["Shaver","Shaver"],["Bald","Bald"],["Hair Dryer","Hair%20Dryer"],
+        ["Curling Iron","Curling%20Iron"],["Mascara","Mascara"],
+        ["Manicure","Manicure"],["Nail Polish","Nail%20Polish"],
+        ["Hair Brush","Hair%20Brush"],["Hair Trimmer","Hair%20Trimmer"],["Beard","Beard"]
+      ],
+      "👓 Vision & Eyewear": [
+        ["Reading Glasses","Reading%20glasses"],["Readers","Readers"],["Glasses","Glasses"]
+      ],
+      "🍬 Health & Wellness": [
+        ["Gummies","Gummies"],["Multivitamins","Multivitamins"],["Probiotics","Probiotics"],
+        ["Sex","Sex"],["Vitamin","Vitamin"],["Protein","Protein"],
+        ["Blood Pressure Monitor","Blood%20Pressure%20Monitor"],
+        ["Thermometer","Thermometer"],["First Aid","First%20Aid"],["Brace","Brace"]
+      ],
+      "☀️ Outdoors & Solar": [
+        ["Solar","Solar"],["Outdoor","Outdoor"],["Zapper","Zapper"],["Seed","Seed"],
+        ["Pool","Pool"],["Camping","Camping"],["Hiking","Hiking"],["Cooler","Cooler"]
+      ],
+      "🐾 Pet Care": [
+        ["Cat Tree","Cat%20Tree"],["Dog Bed","Dog%20Bed"],["Pet Camera","Pet%20Camera"],
+        ["Pet Feeder","Pet%20Feeder"],["Water Fountain (Pet)","Water%20Fountain%20Pet"],
+        ["Dog Toys","Dog%20Toys"],["Cat Toys","Cat%20Toys"],["Pet Grooming","Pet%20Grooming"],
+        ["Poop Bags","Poop%20Bags"]
+      ],
+      "🏷️ Name Brands": [
+        ["Sony","Sony"],["Samsung","Samsung"],["LG","LG"],["Apple","Apple"],["Anker","Anker"],
+        ["JBL","JBL"],["Bose","Bose"],["Logitech","Logitech"],["Razer","Razer"],
+        ["Acer","Acer"],["Asus","Asus"],["TP-Link","TP-Link"],["Netgear","Netgear"],
+        ["Corsair","Corsair"],["Dyson","Dyson"],["Shark","Shark"],["iRobot","iRobot"],
+        ["Keurig","Keurig"],["Ninja","Ninja"],["Instant Pot","Instant%20Pot"],
+        ["Eufy","Eufy"],["Tineco","Tineco"],["Philips","Philips"],["Oral-B","Oral-B"],
+        ["DeWalt","DeWalt"],["Milwaukee","Milwaukee"],["Makita","Makita"],
+        ["Ryobi","Ryobi"],["Kobalt","Kobalt"],["Craftsman","Craftsman"],
+        ["Husky","Husky"],["Garmin","Garmin"],["Goodyear","Goodyear"],
+        ["Bosch","Bosch"],["Meguiar’s","Meguiar's"],["Rain-X","Rain-X"],
+        ["Thule","Thule"],["WeatherTech","WeatherTech"],["Lexmark","Lexmark"]
+      ]
+    };
+
+    const creatorsListItems = [
+      ["Camry 2011","Camry%202011"],
+      ["CR-V 2026","CR-V%202026"],
+      ["CRV 2026","CRV%202026"],
+      ["CR-V 2007","CR-V%202007"],
+      ["CRV 2007","CRV%202007"],
+      ["Express 1500","Express%201500"],
+      ["Dash Cam","Dash%20cam"],
+      ["Dashcam","Dashcam"],
+      ["Wiper","Wiper"],["Relay Switch","Relay%20switch"],
+      ["NHX110","NHX110"],
+      ["Phone Holder","Phone%20holder"],["Tool","Tool"],["Makita","Makita"],
+      ["Tool Kit","Tool%20kit"],["Socket Set","Socket%20set"],["Smart Plug","Smart%20plug"],
+      ["IP68","IP68"],["Wireless","Wireless"],["Google Pixel 10 XL","Google%20Pixel%2010%20XL"],
+      ["Lexmark","Lexmark"],["Robot","Robot"],["Robotic","Robotic"],
+      ["Bluetooth","Bluetooth"],["HDMI","HDMI"],["USB Hub","USB%20Hub"],
+      ["Ethernet","Ethernet"],["Keyboard","Keyboard"],["Headphones","Headphones"],
+      ["Streaming","Streaming"],["iPhone 16 Pro 6.3","iPhone%2016%20Pro%206.3"],
+      ["Beard","Beard"],["Shaver","Shaver"],["Bald","Bald"],
+      ["Reading Glasses","Reading%20glasses"],["Readers","Readers"],["Glasses","Glasses"],
+      ["Hearing Aid","Hearing%20Aid"],["Gummies","Gummies"],["Multivitamins","Multivitamins"],
+      ["Probiotics","Probiotics"],["Sex","Sex"],["Vitamin","Vitamin"],
+      ["Solar","Solar"],["Outdoor","Outdoor"],["Zapper","Zapper"],
+      ["Seed","Seed"],["Pool","Pool"]
+    ];
+
+    // Render Categories & Actions
+    Object.entries(categories).forEach(([title, items], index) => {
+      const catDiv = document.createElement('div');
+      catDiv.className = 'category expanded';
+      catDiv.id = `category-${index}`;
+      catDiv.dataset.title = title.toLowerCase();
+      catDiv.dataset.userExpanded = 'true';
+
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'category-header';
+      headerDiv.setAttribute('role', 'button');
+      headerDiv.setAttribute('tabindex', '0');
+      headerDiv.setAttribute('aria-expanded', 'true');
+      headerDiv.setAttribute('aria-label', `Toggle ${title} searches`);
+
+      const h3 = document.createElement('h3');
+      h3.innerHTML = `<span class="arrow">▶</span> ${title} <span class="cat-count">(${items.length})</span>`;
+
+      const launchBtn = document.createElement('button');
+      launchBtn.className = 'cat-launch-btn';
+      launchBtn.textContent = `🚀 Launch entire category (${items.length})`;
+      launchBtn.onclick = (e) => {
+        e.stopPropagation();
+        launchItems(items, `Launching ${title}`, launchBtn);
+      };
+
+      headerDiv.appendChild(h3);
+
+      headerDiv.onclick = () => {
+        catDiv.classList.toggle('expanded');
+        catDiv.dataset.userExpanded = String(catDiv.classList.contains('expanded'));
+        headerDiv.setAttribute('aria-expanded', catDiv.dataset.userExpanded);
+      };
+      headerDiv.onkeydown = event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          headerDiv.click();
+        }
+      };
+
+      catDiv.appendChild(headerDiv);
+
+      const linksDiv = document.createElement('div');
+      linksDiv.className = 'links';
+
+      items.forEach(([lbl, slug]) => {
+        const termWrapper = document.createElement('span');
+        termWrapper.className = 'term-with-pin';
+        const a = document.createElement('a');
+        a.href = `https://www.amazon.com/vine/vine-items?search=${slug}`;
+        a.target = getOpenMode() === 'new' ? '_blank' : '_self';
+        a.rel = getOpenMode() === 'new' ? 'noopener noreferrer' : '';
+        a.className = 'link-item vine-individual-link';
+        a.textContent = lbl;
+        a.addEventListener('click', () => recordIndividualPick(lbl));
+        a.addEventListener('auxclick', event => {
+          if (event.button === 1) recordIndividualPick(lbl);
+        });
+        termWrapper.appendChild(a);
+
+        const pinButton = document.createElement('button');
+        pinButton.type = 'button';
+        pinButton.className = 'pin-toggle';
+        pinButton.dataset.term = lbl;
+        pinButton.textContent = '☆';
+        pinButton.setAttribute('aria-label', `Pin ${lbl}`);
+        pinButton.onclick = () => toggleFavorite(lbl);
+        termWrapper.appendChild(pinButton);
+        linksDiv.appendChild(termWrapper);
+      });
+
+      linksDiv.appendChild(launchBtn);
+
+      catDiv.appendChild(linksDiv);
+      container.appendChild(catDiv);
+    });
+
+    document.getElementById('categoryCount').textContent = `(${Object.keys(categories).length} groups)`;
+    const jumpSelect = document.getElementById('categoryJumpSelect');
+    Object.keys(categories).forEach((title, index) => {
+      const option = document.createElement('option');
+      option.value = String(index);
+      option.textContent = title;
+      jumpSelect.appendChild(option);
+    });
+    const broadOption = document.createElement('option');
+    broadOption.value = 'broad';
+    broadOption.textContent = '🧭 100 Broad Discovery Keywords';
+    jumpSelect.appendChild(broadOption);
+    renderBroadExplorer();
+    renderDiscoveryTerms();
+    renderRecentSearches();
+    renderMostPicked();
+    renderFavorites();
+    renderBestFinds();
+    renderFeedbackBar();
+    applyOpenMode();
+  </script>
+</body>
+</html>
