@@ -18,4 +18,4 @@ Search preferences, favorites, and ranking activity are stored locally in your b
 
 ## Hosted site
 
-[Brad's Vine Finder](https://brads-vine-finder-nov26.metzger77.chatgpt.site/) (owner sign-in required).
+[Open Brad's Vine Finder on GitHub Pages](https://metzger77.github.io/brads-vine-finder/) (public, no sign-in required).
